@@ -1,0 +1,21 @@
+---
+# This will remove JMeter from the given hosts
+# IMPORTANT: For now, we will assume we control so no virtualenv...
+- name: Uninstall JMeter on remote hosts playbook
+  hosts: jmeter-{{ jmeter_node_type |d('test') }}-nodes
+  sudo: true
+  tasks:
+    - name: Stop any services
+      service: name={{ service_name }} state=stopped pattern={{ service_name }}
+      ignore_errors: true
+
+    - name: Remove JMeter
+      shell: rm -rf /{{ dir_jmeter}}
+      ignore_errors: true
+
+    # This will only remove if file found and it should only be found on slave nodes
+    - file: path=/etc/init.d/{{ service_name }} state=absent
+      ignore_errors: true
+
+    # Note: JMeter requires the Java Runtime so we may have installed it but we don't want to automate the removal since something else may require it after JMeter was installed.
+

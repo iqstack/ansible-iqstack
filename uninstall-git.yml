@@ -1,0 +1,10 @@
+---
+- name: Uninstall Git on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true 
+  tasks:
+    - name: Remove Git
+      apt: name=git state=absent
+      file: path=/home/{{ os_user|d('operations') }}/.git state=absent
+      environment: proxy_env
+

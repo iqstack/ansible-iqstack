@@ -1,0 +1,8 @@
+---
+- name: Install Ansible on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    - name: Installing Ansible
+      apt: name=ansible state=present
+      environment: proxy_env

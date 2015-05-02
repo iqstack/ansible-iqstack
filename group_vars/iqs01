@@ -1,0 +1,46 @@
+---
+# Variables used for specific cluster - IQS01
+
+ansible_ssh_user: chrisjones
+ansible_ssh_private_key_file: ~/.ssh/google_compute_engine
+ansible_sudo_pass:
+
+# JMeter section
+# Comma delimited list of slave nodes - Have to do this manually for now.
+jmeter_slave_nodes: iqs01-beta-r1n2, iqs01-beta-r1n3, iqs01-beta-r1n4
+
+# JMeter Master Node Host Name (really only singular but using plural to be consistent with group name)
+jmeter_master_nodes: iqs01-beta-r1n1
+
+# OpenStack or Operating System User (depends on context) - can be same or different that ansible_ssh_user
+# Note: os_user will be different on some hosts so check the host_vars for the specific host to see it's os_user
+os_user: chrisjones
+vip: <ip>
+ceph: <ceph_ip>
+keystone_token: admin_token
+
+# Put the region in CAPS
+region: IQS01
+
+os_cacert: /etc/ssl/certs/ssl-iqs.pem
+os_tenant_name: admin
+os_password: os-password
+os_username: admin
+os_admin_role: admin
+
+keystone_env:
+  OS_AUTH_URL: https://{{ vip }}:5000/v2.0
+  OS_PASSWORD: "{{ os_password }}"
+  OS_REGION: LL2C03
+  OS_SERVICE_TOKEN: "{{ keystone_token }}"
+  OS_SERVICE_ENDPOINT: https://{{ vip }}:5000/v2.0
+  OS_CACERT: "{{ os_cacert }}"
+  OS_USERNAME: "{{ os_username }}"
+  OS_TENANT_NAME: "{{ os_tenant_name }}"
+  #http_proxy:
+  #https_proxy:
+  #no_proxy: localhost,127.0.0.0/8,127.0.1.1,127.0.1.1*,local.home,192.0.0.0/8,10.0.0.0/8,172.0.0.0/8
+  #PIP_CERT: /etc/ssl/certs/ca-certificates.crt
+  #PIP_PROXY:
+  #GIT_SSL_NO_VERIFY: true
+  #CURL_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt

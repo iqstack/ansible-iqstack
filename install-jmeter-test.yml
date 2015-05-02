@@ -1,0 +1,18 @@
+---
+# Installs Apache JMeter onto the remote host in master only or master/slave configurations.
+# To keep things simple, the playbook will not distinguish test specific files such as CSVs, shell scripts, etc
+# between master and slave and thus put whatever files are in the specific test's subdirectory to both master and slave.
+
+# NOTE: This playbook does not run the test but only sets it up to be ran. Use 'run-jmeter-test.yml' playbook to
+# run a specific test.
+
+- name: Install JMeter Test on remote host playbook
+  hosts: jmeter-test-nodes
+  sudo: true
+  environment: proxy_env
+  tasks:
+    - name: Install JMeter Tests
+      copy: src=files/jmeter/tests/{{ jmeter_test }}/ dest=/{{ dir_jmeter }}/ owner={{ os_user }} group={{ os_user }}
+
+    - shell: chmod +x /{{ dir_jmeter }}/*.sh
+      ignore_errors: true

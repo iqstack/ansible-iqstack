@@ -1,0 +1,24 @@
+---
+# Runs an Apache JMeter test on the remote host.
+# IMPORTANT: ALL JMeter tests assume that ports 1099 (default) is open on master and slaves and a higher number port
+# of your choice (default is 51099). These ports MUST be open on the nodes and firewall (if applicable). If the ports
+# are not open and can't be then you can use an SSH Tunnel. Since the traffic from the slave to the master can be
+# reduced in the rmi config settings this would be fine.
+
+- name: Run JMeter Test on remote host playbook
+  hosts: jmeter-test-nodes
+  sudo: true
+  environment: proxy_env
+  tasks:
+    # The JMX file is an XML file of the JMeter test. This can be edited via the JMeter GUI or directly. Refer to the
+    # JMeter documentation on the available attributes.
+    # Copy below will copy ALL the files in the files/<whatever you call it>/ directory
+    - name: Install the JMeter test configurations
+      copy: src=files/jmeter/tests/{{ jmeter_test }}/ dest=/{{ dir_jmeter }}/ owner={{ os_user }} group={{ os_user }}
+
+    #- copy: src=files/{{ jmx_test_shell_file }} dest=/{{ dir_jmeter }}/ owner={{ os_user }} group={{ os_user }}
+
+    # Note: The shell script file simply removes logs, runs the test(s) and produces logs that can be later extracted.
+    # You will need to ssh into the master to start the test since you may do other pre and post test things in
+    # addition to the fact that ansible may timeout if the test runs for a real long time.
+

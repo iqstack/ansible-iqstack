@@ -1,0 +1,28 @@
+---
+# NOTE: The playbook that sets up the environment variables, proxies, etc MUST have been
+# run before this!
+- name: Install better PIP on remote host playbook
+  hosts: bootstrap-nodes
+  tasks:
+    - name: Getting PIP
+      get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/home/{{ os_user }}/get-pip.py
+      environment: proxy_env
+
+    # Debian/Ubuntu
+    - name: Remove distro pip if exists
+      sudo: true
+      apt: name=python-pip state=absent
+      ignore_errors: true
+      when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+    # CentOS/RedHat/Fedora
+    - name: Remove distro pip if exists
+      sudo: true
+      yum: name=python-pip state=absent
+      ignore_errors: true
+      when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat" or ansible_os_family == "Fedora"
+
+    - name: Install PIP
+      sudo: true
+      shell: python /home/{{ os_user }}/get-pip.py
+      environment: proxy_env

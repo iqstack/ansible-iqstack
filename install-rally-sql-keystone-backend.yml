@@ -1,0 +1,22 @@
+---
+# Install and run keystone_populate.sh on the given head nodes before installing and/or running Rally.
+# This will go away once we move from a template backend to a SQL backend.
+
+# UPDATE: No need to do this now except on the bootstrap node IF you use the VIP for ALL of the IP parameters except
+# Ceph, the last one.
+
+- name: Install keystone_populate.sh on remote host playbook
+  hosts: head-nodes
+  environment: keystone_env
+  tasks:
+    - name: Copy over script
+      copy: src=files/rally/keystone_populate.sh dest=/home/{{ os_user }}/keystone_populate.sh owner={{ os_user }} group={{ os_user }} mode=0755
+
+    # Need to ssh into head nodes and run the script. For some reason ansible hangs urr...
+    #- name: Running script
+    #  shell: /home/{{ os_user }}/keystone_populate.sh {{ keystone_token }} {{ ansible_ssh_host }} {{ region }} {{ vip }} {{ ceph }}
+    #  args:
+    #    chdir: /home/{{ os_user }}
+    #  register: shell
+    #- debug: var=shell.stdout_lines
+

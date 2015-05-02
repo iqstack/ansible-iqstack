@@ -1,0 +1,36 @@
+---
+# Installs Apache JMeter onto the remote host in master only or master/slave configurations.
+
+- name: Install JMeter Master on remote host playbook
+  hosts: jmeter-master-nodes
+  sudo: true
+  environment: proxy_env
+  tasks:
+    #- name: Update apt
+    #  apt: update_cache=yes
+
+    # Note: Java Runtime artifact will remain if we install it here. Uninstall will not remove it.
+    - name: Install JRE
+      apt: name=default-jre state=present
+      when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+    # CentOS/RedHat/Fedora version
+    - name: Install JRE
+      yum: name=default-jre state=present
+      when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat" or ansible_os_family == "Fedora"
+
+    - file: path=/{{ dir_jmeter }}/ state=directory
+
+    - name: Install JMeter Master Nodes
+      unarchive: src=files/jmeter/jmeter.tgz dest=/{{ dir_jmeter }}/ copy=yes
+
+    - name: Removing tar file
+      file: path=/{{ dir_jmeter }}/jmeter.tgz state=absent
+
+    - name: Reset permissions
+      shell: chown -R {{ os_user }}:{{ os_user }} /{{ dir_jmeter}}/
+
+    - name: Setting up the configuration
+      template: src=templates/jmeter/master.jmeter.properties.j2.ini dest=/{{ dir_jmeter }}/jmeter/bin/jmeter.properties owner={{ os_user }} group={{ os_user }} mode=0644
+      tags:
+        - config

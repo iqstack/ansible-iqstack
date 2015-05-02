@@ -1,0 +1,34 @@
+---
+# Should we assume we control the packages and environment OR install and remove in a virtualenv?
+# IMPORTANT: For now, we will assume we control so no virtualenv...
+- name: Uninstall Rally on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    - name: Remove Rally Callables
+      shell: rm -f /usr/local/bin/rally; rm -f /usr/local/bin/rally-manage
+      ignore_errors: true
+
+    - name: Removing Python Rally Files
+      file: path=/{{ dir_rally }} state=absent
+      ignore_errors: true
+
+    - name: Remove hidden rally in home directory
+      shell: rm -rf /home/{{ os_user }}/.rally
+      ignore_errors: true
+
+    - name: Removing Rally Config Files
+      shell: rm -rf /etc/rally
+      ignore_errors: true
+
+    - file: path=/home/{{ os_user }}/.rally state=absent
+      file: path=/etc/bash_completion.d/rally.bash_completion state=absent force=true
+      ignore_errors: true
+
+    - name: Removing Rally Database Files
+      shell: rm -rf /var/lib/rally
+      ignore_errors: true
+
+    - name: Remove Rally
+      shell: rm -rf /usr/local/lib/python2.7/dist-packages/rally*
+      ignore_errors: true

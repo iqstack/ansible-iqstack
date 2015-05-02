@@ -1,0 +1,68 @@
+##########
+# Group of Groups Declaration Section - DO NOT MODIFY THIS SECTION
+# Leave this bootstrap-nodes INI block empty
+[bootstrap-nodes]
+
+# Leave this head-nodes INI block empty
+[head-nodes]
+
+# Leave this worker-nodes INI block empty
+[worker-nodes]
+
+# Leave this jmeter-test-nodes INI block empty
+[jmeter-test-nodes]
+
+
+##########
+# JMeter Section
+
+# Note: Add the hostname or IP of the node you wish to be the JMeter Master node. Master nodes control the slave nodes.
+# There needs to be ONLY one master per test run. *Change the host name or IP of the master node here.*
+# If you want to run this on the master node then set the hostname or IP below but then change the playbook
+# 'install-jmeter-master.yml' hosts section to say localhost instead of jmeter-master-node. The reason for this is
+# because 'jmeter-master-node' value below is also used in other playbooks that need the correct host name or IP.
+
+[jmeter-master-nodes]
+iqs01-beta-r1n1
+
+# Note: You can have as many slave nodes as required for the given test.
+# There MUST be at least one (can be the same as the Master). Add as many slave host names or IPs as needed.
+# NOTE: For now, manually add the slave nodes below into the variable in jmeter_slave_nodes in the cluster specific
+# file. For example, for the cluster iqs-beta the file will be in group_vars/iqs01
+
+[jmeter-slave-nodes]
+iqs01-beta-r1n2
+iqs01-beta-r1n3
+iqs01-beta-r1n4
+
+# Note: DO NOT MODIFY SECTION
+
+[jmeter-test-nodes:children]
+jmeter-master-nodes
+jmeter-slave-nodes
+
+
+##########
+# OpenStack and Ceph Section that identifies your cluster
+# Only listed the bootstrap and headnodes in this list but it would normally be all nodes in the cluster.
+
+[iqs01]
+iqs01-beta-r1n1
+iqs01-beta-r1n2
+iqs01-beta-r1n3
+iqs01-beta-r1n4
+
+[iqs01-bootstrap]
+iqs01-beta-r1n1
+
+[iqs01-head-nodes]
+iqs01-beta-r1n2
+iqs01-beta-r1n3
+iqs01-beta-r1n4
+
+[bootstrap-nodes:children]
+iqs01-bootstrap
+
+[head-nodes:children]
+iqs01-head-nodes
+

@@ -1,0 +1,53 @@
+---
+# Uninstall playbook for Tempest. This playbook assumes directories match the
+# directories used in install-tempest.yml which is '/opt/tempest/'. It attempts
+# to uninstall the dependencies found in the Tempest requiresment.txt file.
+# The dependencies items are what actually run the tests so actually installing
+# installing Tempest is not required but is optional.
+- name: Uninstall Tempest on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    # Do we need to install in a virtual environment or assume we control the packages?
+    # Note: Update to why the next 2 specific tasks are commented out: We will leave the small artifacts
+    ##############
+    # of python behind until we change the playbooks to install within virtualenv so as not to break something else.
+    #- name: Uninstall Tempest requirements
+    #  pip: requirements=/{{ dir_tempest }}/requirements.txt state=absent
+    #  ignore_errors: true
+
+    # When you remove tempest it will remove dependencies that rally and others may need so
+    # add them back of rally exists else ignore the error and move on.
+    #- name: Check to see if Rally is installed and fix the joint deps between it and tempest
+    #  pip: requirements=/{{ dir_rally }}/requirements.txt state=present
+    #  ignore_errors: true
+    ##############
+
+    # This task should remove all of the dependencies that are not required
+    # for something else. Tempest-lib, testrepositrory, testr, subunit, etc.
+    - name: Removing Python Tempest Files
+      file: path=/{{ dir_tempest }} state=absent
+      ignore_errors: true
+
+    - name: Will try to remove Tempest in distribution area
+      shell: rm -rf /usr/local/lib/python2.7/dist-packages/tempest/
+      ignore_errors: true
+
+    - name: Remove Temptest artifacts
+      shell: rm -rf /usr/local/lib/python2.7/dist-packages/tempest-*
+      ignore_errors: true
+
+    - name: Sanity check for Tempest-Lib
+      shell: rm -rf /usr/local/lib/python2.7/dist-packages/tempest_lib*
+      ignore_errors: true
+
+    # Note: Leave the artifacts on the box OR install them all in a virtualenv
+    #- name: Remove test oriented items
+    #  shell: rm -rf /usr/local/lib/python2.7/dist-packages/test*
+    #  ignore_errors: true
+
+    #- shell: rm -rf /usr/local/lib/python2.7/dist-packages/unit*
+    #  ignore_errors: true
+
+    #- shell: rm -rf /usr/local/lib/python2.7/dist-packages/tox*
+    #  ignore_errors: true

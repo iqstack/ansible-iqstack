@@ -1,0 +1,8 @@
+---
+- name: Rally update config playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    - name: Update /etc/rally/rally.conf
+      copy: src=files/rally.conf dest=/etc/rally/rally.conf
+

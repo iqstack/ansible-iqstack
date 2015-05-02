@@ -1,0 +1,8 @@
+---
+- name: Uninstall Ansible on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    - name: uninstalling Ansible
+      apt: name=ansible state=absent
+      file: path=/home/{{ os_user|d('operations') }}/.ansible state=absent

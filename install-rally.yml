@@ -1,0 +1,49 @@
+---
+# Make certain install-git.yml has been called first or that git is installed with correct proxy info if required.
+# IMPORTANT: The SSL cert for the OpenStack cluster should be located and called /etc/ssl/certs/ssl-bcpc.pem
+# Templates and cert install/updates should be done (later).
+# In addition, the keystone_populate.sh script must have be run on the head nodes so as to populate mysql with
+# our cluster settings.
+
+- name: Install Rally on remote host playbook
+  hosts: bootstrap-nodes
+  tasks:
+    - name: Git Cloning Rally
+      sudo: true
+      git: repo=https://github.com/stackforge/rally dest=/{{ dir_rally }} clone=yes
+      environment: proxy_env
+
+    - name: Changing Ownership
+      sudo: true
+      shell: chown -R {{ os_user }}:{{ os_user }} /{{ dir_rally}}/
+      environment: proxy_env
+
+    - name: Running Install Script
+      sudo: true
+      shell: /{{ dir_rally }}/install_rally.sh
+      environment: keystone_env 
+
+    - name: Creating Output Directory
+      sudo: true
+      file: path=/{{ dir_rally }}/output state=directory owner={{ os_user }} group={{ os_user }}
+
+    - name: Copying rally.conf
+      sudo: true
+      template: src=templates/rally/rally.j2.ini dest=/etc/rally/rally.conf owner=root group=root mode=0644
+      tags:
+        - config
+
+    - name: Setting up Rally Deployment
+      environment: keystone_env
+      shell: rally deployment create --fromenv --name=existing
+      
+    - name: Setting default deployment
+      environment: keystone_env
+      shell: rally deployment use existing
+
+    # Note: Now you can call 'rally deployment check' to verify rally is ready for testing.
+    - name: Checking the Rally Deployment
+      environment: keystone_env
+      shell: rally deployment check
+      register: shell
+    - debug: var=shell.stdout_lines

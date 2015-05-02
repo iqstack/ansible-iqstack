@@ -1,0 +1,14 @@
+---
+# NOTE: Change to template or variable substitution later..
+
+- name: Rally Task List command playbook
+  hosts: bootstrap-nodes
+  sudo: false
+  tasks:
+    - name: Running...
+      environment: keystone_env
+      shell: rally task list
+      register: shell
+    - debug: var=shell.stdout_lines       
+
+# Must use var= to wrap the output correctly

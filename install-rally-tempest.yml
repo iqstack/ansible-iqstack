@@ -1,0 +1,18 @@
+---
+# Make certain install-git.yml has been called first or that git is installed with correct proxy info if required.
+# IMPORTANT: The SSL cert for the OpenStack cluster should be located and called /etc/ssl/certs/ssl-bcpc.pem
+# Templates and cert install/updates should be done (later).
+# In addition, the keystone_populate.sh script must have be run on the head nodes so as to populate mysql with
+# our cluster settings.
+
+- name: Install Tempest via Rally on remote host playbook
+  hosts: bootstrap-nodes
+  tasks:
+    - name: Running Install Script
+      command: rally-manage tempest install
+      args:
+        chdir: /{{ dir_rally }}
+      environment: keystone_env
+
+    # Can also run 'rally verify start' and rally will install and run tempest but this takes a long time.
+

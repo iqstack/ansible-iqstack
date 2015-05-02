@@ -1,0 +1,8 @@
+---
+- name: Install PIP on remote host playbook
+  hosts: bootstrap 
+  sudo: true
+  tasks:
+    - name: Installing PIP
+      easy_install: name=pip
+      environment: proxy_env

@@ -1,0 +1,17 @@
+---
+# NOTE: Change to template or variable substitution later..
+
+- name: Rally run test playbook
+  hosts: bootstrap-nodes
+  sudo: false
+  tasks:
+    - name: Run Test
+      environment: keystone_env
+      shell: 'rally task start /{{ dir_rally|d('opt/rally') }}/samples/tasks/{{ test_type }}/{{ test_module }}/{{ test_name }}.{{ test_name_type }}'
+      #shell: 'rally task start /opt/rally/samples/tasks/scenarios/keystone/create-and-list-users.json'
+      
+    - name: Generating Report
+      environment: keystone_env
+      shell: rally task report --out /{{ dir_rally|d('opt/rally') }}/output/{{ test_type  }}-{{ test_module }}-{{ test_name }}.html
+
+

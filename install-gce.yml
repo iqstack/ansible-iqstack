@@ -1,0 +1,38 @@
+---
+# This playbook sets up the needed libraries that Ansible needs to manipulate GCE directly instead of using
+# gcloud at the command line or using the APIs in your own scripts.
+# Note: Go to http://docs.ansible.com/guide_gce.html to get updated instructions for creating project specific
+# keys for GCE (p12 format) and then converting them to .pem format to be usable.
+
+- name: Install Google Compute Engine on local host playbook
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  sudo: true
+  tasks:
+    # If this is for the Mac then certs will need to imported into keychains found in Applications/utilities.
+    # A cert bundle (cacert.pem) can be found in files/cacert.pem. Also, you can get an updated
+    # one from http://curl.haxx.se/ca/cacert.pem.
+
+    # PIP must already be installed
+    # gcloud uses Python to do things from the command line. The API SDK can be in other flavors such as Ruby etc.
+    - name: GCE - gcloud
+      pip: name=gcloud state=latest
+
+    # You can add whatever flavor is available that you like. The default for iqstack is python.
+    - name: GCE Python SDK
+      pip: name=google-api-python-client state=latest
+
+    - name: Installing Apache Libcloud
+      pip: name=apache-libcloud state=present
+
+    - name: Make sure the gcloud components are updated along with alpha for Containers
+      shell: gcloud components update
+      ignore_errors: true
+
+    - name: gsutils update in gcloud
+      shell: gcloud components update gsutil
+      ignore_errors: true
+
+    - shell: gcloud components update alpha
+      ignore_errors: true

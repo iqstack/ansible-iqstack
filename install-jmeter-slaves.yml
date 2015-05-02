@@ -1,0 +1,43 @@
+---
+# Installs Apache JMeter onto the remote host in master only or master/slave configurations.
+
+- name: Install JMeter Slave(s) on remote host playbook
+  hosts: jmeter-slave-nodes
+  sudo: true
+  environment: proxy_env
+  tasks:
+    #- name: Update apt
+    #  apt: update_cache=yes
+
+    # Note: Java Runtime artifact will remain if we install it here. Uninstall will not remove it.
+    - name: Install JRE
+      apt: name=default-jre state=present
+
+    - file: path=/{{ dir_jmeter }}/ state=directory
+
+    - name: Install JMeter Slave Node
+      unarchive: src=files/jmeter/jmeter.tgz dest=/{{ dir_jmeter }}/ copy=yes
+
+    - name: Removing tar file
+      file: path=/{{ dir_jmeter }}/jmeter.tgz state=absent
+
+    - name: Reset permissions
+      shell: chown -R {{ os_user }}:{{ os_user }} /{{ dir_jmeter}}/
+
+    - name: Setting up the configuration
+      template: src=templates/jmeter/slave.jmeter.properties.j2.ini dest=/{{ dir_jmeter }}/jmeter/bin/jmeter.properties owner={{ os_user }} group={{ os_user }} mode=0644
+      tags:
+        - config
+      notify: restart jmeter
+
+    - name: Setting up the services
+      template: src=templates/init.d-template.j2 dest=/etc/init.d/{{ service_name }} owner=root group=root mode=0755
+      tags:
+        - config
+      notify: restart jmeter
+
+    - service: name={{ service_name }} state=started enabled=yes
+
+  handlers:
+    - name: restart jmeter
+      service: name={{ service_name }} state=restarted

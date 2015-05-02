@@ -1,0 +1,59 @@
+---
+# IMPORTANT: This section sets the 'global' scope while individual cluster files represents the given cluster and
+# host_vars/hostname represents the individual host.
+proxy: false
+
+# os_user - The typical OpenStack or Operating System user for the clusters depending on the context.
+# Each cluster can override this value if needed.
+os_user: chrisjones
+
+# Directories for where Tempest, Rally and JMeter will reside. NOTE: Leading and trailing '/' are left out!
+dir_base: opt
+dir_tempest: "{{ dir_base }}/tempest"
+dir_rally: "{{ dir_base }}/rally"
+dir_rally_output: output/rally/samples
+dir_jmeter: "{{ dir_base }}/jmeter"
+
+
+
+# JMeter specific items - Change these as needed to fit your test(s).
+# NAME OF TEST - CHANGE THIS AS NEEDED
+jmeter_test: beta_rgw
+
+
+
+# The jmx file should be located in the jmx_test_dir defined below.
+jmx_file: sample.jmx
+
+# The Master port is the port that the master listens to and must be some high unique number
+jmeter_master_port: 51099
+jmeter_slave_port: 1099
+# jmeter_node_type must be present even if empty
+jmeter_node_type: slave
+
+###
+# Setting the JMeter Slaves up as Daemons
+service_name: jmeter
+service_desc: "JMeter Server that runs tests from the Master node: {{ jmeter_master_nodes }}"
+daemon: /{{ dir_jmeter }}/jmeter/bin/jmeter
+# Add more options if needed but most of the options should be updated in the jmeter.properties template which it reads.
+daemon_opts: "-s -n"
+
+# Batching section:
+# Sets the batching mode. The default is Standard but other values are:
+# Standard, Batch, Hold, Statistical, Stripped, StrippedBatch, DiskStore, StrippedDiskStore
+jmeter_batching_mode: StrippedDiskStore
+
+# This value sets the number of samples before the slaves send data back to the master.
+jmeter_batching_sample_threshold: 250
+
+proxy_env:
+  must_have_something:
+  #http_proxy:
+  #https_proxy:
+  #no_proxy: localhost,127.0.0.0/8,127.0.1.1,127.0.1.1*,local.home,192.0.0.0/8,10.0.0.0/8,172.0.0.0/8
+  #PIP_CERT: /etc/ssl/certs/ca-certificates.crt
+  #PIP_PROXY:
+  #GIT_SSL_NO_VERIFY: true
+  #CURL_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+

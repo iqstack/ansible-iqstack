@@ -1,0 +1,12 @@
+---
+# This playbook simply goes and gets the given file (file_src) and puts it into the rally out directory of the localhost (file_dest)
+# Two variables are passed 'file_src' and 'file_dest'. The default values are as follows:
+# file_src = output.html, file_desc = output.html, dir_rally = opt/rally, dir_rally_output = output/rally/samples
+
+- name: Rally html output retrieval playbook
+  hosts: bootstrap-nodes
+  sudo: false
+  tasks:
+    - name: Fetch output
+      fetch: src=/{{ dir_rally|d('opt/rally') }}/output/{{ file_src|d('output.html') }} dest={{ dir_rally_output|d('output/rally/samples') }}/{{ file_dest|d('output.html') }} flat=yes
+

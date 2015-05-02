@@ -1,0 +1,47 @@
+---
+# Make certain install-git.yml has been called first or that git is installed with correct proxy info if required.
+# IMPORTANT: The SSL cert for the OpenStack cluster should be located and called /etc/ssl/certs/ssl-bcpc.pem
+# Templates and cert install/updates should be done (later).
+# In addition, the keystone_populate.sh script must have be run on the head nodes so as to populate mysql with
+# our cluster settings.
+
+- name: Install Tempest on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true
+  tasks:
+    - name: Git Cloning Tempest
+      git: repo=https://github.com/openstack/tempest dest=/{{ dir_tempest }} clone=yes
+      environment: proxy_env
+
+    - name: Changing Ownership
+      shell: chown -R {{ os_user }}:{{ os_user }} /{{ dir_tempest }}/
+      environment: proxy_env
+
+    - name: Creating Output Directory
+      file: path=/{{ dir_tempest }}/output state=directory owner={{ os_user }} group={{ os_user }}
+
+    - name: Copying tempest.conf
+      template: src=templates/tempest/tempest.j2.ini dest=/{{ dir_tempest }}/etc/tempest.conf owner={{ os_user }} group={{ os_user }} mode=0644
+      tags:
+        - tempest_conf
+
+    - name: Install Tempest Requirements
+      pip: requirements=/{{ dir_tempest }}/requirements.txt state=present
+      environment: keystone_env
+
+    # This will create a .testrepository in the /opt/tempest directory which will hold the test results
+    # This only applies to test runs by testr or they can also be added with 'testr load < <whatever test>'
+    - name: Setup tempest environment
+      command: testr init
+      args:
+        chdir: /{{ dir_tempest }}
+
+
+# NOTE: Run tempest test like the following:
+# Tempest subsitutes the '/' with '.' and requires the Class name and method.
+# For example, 'sudo python -m subunit.run tempest.api.identity.admin.v2.test_roles.RolesTestJSON.test_list_roles | subunit2pyunit'
+# There are other methods but that is a simple way to do a single test. You can also use 'testtools.run' insead
+# 'subunit.run'. For example:
+# sudo python -m testtools.run tempest.api.identity.admin.v2.test_roles.RolesTestJSON.test_list_roles
+# Notice there is no pipe to subunit2pyunit because only subunit uses streaming. The subunit2pyunit is part of a
+# number of helper subunit tools to reformat the binary stream data of subunit.

@@ -1,0 +1,24 @@
+---
+- name: Install Git on remote host playbook
+  hosts: bootstrap-nodes
+  sudo: true 
+  tasks:
+    # Debian/Ubuntu
+    - name: Setup Git
+      apt: name=git state=present
+      environment: proxy_env
+      when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+    # CentOS/RedHat/Fedora
+    - name: Setup Git
+      yum: name=git state=present
+      environment: proxy_env
+      when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat" or ansible_os_family == "Fedora"
+
+    # This task will only run if you set the 'proxy' variable to true. All variables begin at 'group_vars/all' and
+    # then get overridden via 'group_vars/<cluster>' and then (if applicable) 'host_vars/hostname'
+    - name: Git Config Proxy
+      shell: git config --global http.proxy http://<some.proxy.com>:80; git config --global https.proxy http://<some.proxy.com>:80
+      environment: proxy_env
+      when: proxy
+
